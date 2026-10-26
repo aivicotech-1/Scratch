@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/scratchfoundation/scratch-editor",
+  "commit": "cf59b9d0a4de6d79b961e5bd56806edd31d11840",
+  "version": "15.3.0",
+  "node": "24.22.1",
+  "license": "AGPL-3.0-only",
+  "lockfileSHA256": "dab6c22d2a0b2240291257f54fd9f639e9ab079f15fa32c2646f22d033c65d7f",
+  "libraryAssets": {
+    "source": "https://cdn.assets.scratch.mit.edu",
+    "total": 1347,
+    "downloaded": 1347,
+    "failures": [],
+    "verified": "MD5 content identifiers"
+  }
+}

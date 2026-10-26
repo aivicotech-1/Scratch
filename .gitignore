@@ -1,0 +1,15 @@
+.cache/
+projects/
+web/library-assets/
+web/dist/
+tools/node-v*/
+research/validation/*.sb3
+
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+node_modules/

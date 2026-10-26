@@ -1,0 +1,3 @@
+[submodule "scratch-editor"]
+	path = scratch-editor
+	url = https://github.com/scratchfoundation/scratch-editor.git

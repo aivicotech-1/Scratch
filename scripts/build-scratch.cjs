@@ -1,0 +1,20 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+const root=path.resolve(__dirname,'..');
+const source=path.join(root,'scratch-editor');
+const version=fs.readFileSync(path.join(source,'.nvmrc'),'utf8').trim().replace(/^v/,'');
+const node=path.join(root,'tools','node-v'+version,'node.exe');
+const env={...process.env,PATH:path.dirname(node)+path.delimiter+process.env.PATH,TEMP:path.join(root,'.cache/temp'),TMP:path.join(root,'.cache/temp'),CI:'1',NODE_ENV:'development',NODE_OPTIONS:'--max-old-space-size=6144',npm_config_cache:path.join(root,'.cache/npm')};
+function run(label,cwd,args){console.log('\nBUILD '+label);const result=spawnSync(node,args,{cwd,env,stdio:'inherit'});if(result.status!==0)process.exit(result.status||1);}
+const pkg=name=>path.join(source,'packages',name);
+const webpack=path.join(source,'node_modules/webpack/bin/webpack.js');
+run('GUI generated assets',pkg('scratch-gui'),['scripts/prepare.mjs']);
+run('Task herder types',pkg('task-herder'),[path.join(source,'node_modules/typescript/bin/tsc'),'--project','tsconfig.build.json']);
+run('Task herder',pkg('task-herder'),[path.join(source,'node_modules/vite/bin/vite.js'),'build']);
+run('Storage',pkg('scratch-storage'),[webpack,'--mode=development','--stats=errors-warnings']);
+run('SVG renderer',pkg('scratch-svg-renderer'),[webpack,'--mode=development','--stats=errors-warnings']);
+run('Stage renderer',pkg('scratch-render'),[webpack,'--mode=development','--stats=errors-warnings']);
+run('VM and extension worker',pkg('scratch-vm'),[webpack,'--mode=development','--stats=errors-warnings']);
+run('Scratch editor',pkg('scratch-gui'),[path.join(root,'scripts/build-scratch-web.cjs')]);
+console.log('Scratch editor built at '+path.join(root,'web/dist/index.html'));

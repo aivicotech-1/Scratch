@@ -1,0 +1,10 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const crypto=require('node:crypto');
+const {execFileSync}=require('node:child_process');
+const root=path.resolve(__dirname,'..');
+const source=path.join(root,'scratch-editor');
+const commit=execFileSync('git',['rev-parse','HEAD'],{cwd:source,encoding:'utf8'}).trim();
+const manifest=JSON.parse(fs.readFileSync(path.join(source,'package.json'),'utf8'));
+const record={repository:'https://github.com/scratchfoundation/scratch-editor',commit,version:manifest.version,node:fs.readFileSync(path.join(source,'.nvmrc'),'utf8').trim(),license:manifest.license,lockfileSHA256:crypto.createHash('sha256').update(fs.readFileSync(path.join(source,'package-lock.json'))).digest('hex'),libraryAssets:JSON.parse(fs.readFileSync(path.join(root,'web/library-assets/manifest.json'),'utf8'))};
+fs.writeFileSync(path.join(root,'research/scratch-provenance.json'),JSON.stringify(record,null,2));
