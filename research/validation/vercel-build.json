@@ -1,0 +1,12 @@
+{
+  "buildPlatform": "win32",
+  "node": "v24.22.1",
+  "productionBuild": true,
+  "vercelRoutingValidated": true,
+  "assetRedirectAndContentTypePassed": true,
+  "privateFilesNotServed": true,
+  "libraryAssets": 1347,
+  "outputFiles": 3055,
+  "outputBytes": 159273254,
+  "cloudDeploymentTested": false
+}

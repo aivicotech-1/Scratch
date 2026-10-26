@@ -13,3 +13,4 @@ research/validation/*.sb3
 *.pfx
 *.p12
 node_modules/
+.vercel/

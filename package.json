@@ -1,0 +1,17 @@
+{
+  "name": "aivico-scratch-website",
+  "version": "1.0.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "node scripts/serve-scratch-web.cjs",
+    "start": "node scripts/serve-scratch-web.cjs",
+    "build": "node scripts/build-deployment.cjs",
+    "build:editor": "node scripts/build-scratch-web.cjs",
+    "test:server": "node scripts/test-scratch-web-server.cjs",
+    "test:browser": "node scripts/test-scratch-web.cjs"
+  }
+}

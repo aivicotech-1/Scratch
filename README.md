@@ -88,6 +88,43 @@ Invoke-RestMethod 'http://127.0.0.1:8601/healthz'
 
 The response should contain `app: scratch-local-web` and `port: 8601`.
 
+## Deploy to Vercel
+
+Import **aivicotech-1/Scratch** from GitHub into Vercel and select the **main** branch. Use the repository root (do not select scratch-editor). The checked-in vercel.json supplies these settings:
+
+| Setting | Value |
+| --- | --- |
+| Framework preset | Other |
+| Node.js | 24.x |
+| Install command | npm ci --prefix scratch-editor --ignore-scripts --include=dev --no-audit --no-fund |
+| Build command | npm run build |
+| Output directory | web/dist |
+
+No application secrets or environment variables are required for the current editor. Future server credentials belong in Vercel's Environment Variables settings, not in Git or client-side JavaScript.
+
+Vercel fetches the public Scratch submodule. The build compiles the editor in production mode, downloads and verifies the standard assets, and copies them into the static output. The asset rewrite in vercel.json maps Scratch's asset URLs to those packaged files. No persistent Node server or Windows launcher runs on Vercel.
+
+After deployment reaches **Ready**, open the assigned HTTPS address and test it in a signed-out/private window before sharing. Confirm production Deployment Protection permits your intended visitors. The first deployment needs network access to npm, Scratch's asset service and the generated micro:bit asset download.
+
+Use File > Save to your computer to keep projects. Hosting the editor does not add accounts, cloud project storage or Scratch community services.
+
+### npm commands
+
+With Node.js 24.x installed and the project prepared:
+
+~~~powershell
+npm run dev
+~~~
+
+This starts localhost:8601 in the terminal; Ctrl+C stops it. To build the complete production site:
+
+~~~powershell
+npm run build
+~~~
+
+The production build also works on Linux and uses the running Node executable. Builds fetch missing standard assets and place deployable files under web/dist. Rebuilding only the editor clears that output, so use the full production build before deployment.
+
+
 ## Set up a fresh GitHub clone (Windows)
 
 This repository tracks the official Scratch source as a **Git submodule**, pinned to the commit in research/scratch-provenance.json. Use a recursive clone so you receive both this website integration and the Scratch source:
@@ -173,3 +210,5 @@ The upstream LICENSE and TRADEMARK notices remain intact. Public release still n
 ## Secrets and environment files
 
 The current localhost editor requires no API keys or application secrets. Keep any future credentials in a local .env file, never in source code. Local .env files are ignored by Git; .env.example documents required variables without real values. The current server does not automatically load .env files. GitHub authentication stays in Windows Git Credential Manager and is not part of this repository.
+
+Production verification (26 October 2026): the full production build and all 12 browser checks passed locally using Vercel's compiled routing rules. All 1,347 library assets were packaged, asset redirects/content types worked, and private files returned 404. Build warnings concern bundle size and optional Node-only canvas support. The first actual Vercel cloud deployment remains to be performed by the account owner.

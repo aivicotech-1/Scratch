@@ -1,12 +1,14 @@
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 process.env.CI = '1';
 const webpack = require(path.join(root, 'scratch-editor/node_modules/webpack'));
 process.chdir(path.join(root, 'scratch-editor/packages/scratch-gui'));
 const config = require(path.join(process.cwd(), 'webpack.config.js'));
 config.entry = {gui: config.entry.gui};
 config.output.path = path.join(root, 'web/dist');
+config.output.clean = true;
+if (process.env.NODE_ENV === 'production') config.devtool = false;
 config.resolve.modules = [...(config.resolve.modules || ['node_modules']), path.join(root, 'scratch-editor/node_modules')];
 config.plugins = config.plugins.filter(plugin =>
     plugin.constructor.name !== 'HtmlWebpackPlugin' || plugin.userOptions.chunks?.includes('gui'));

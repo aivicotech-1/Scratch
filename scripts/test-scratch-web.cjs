@@ -4,7 +4,8 @@ const assert=require('node:assert/strict');
 const {chromium}=require('../scratch-editor/node_modules/playwright');
 const root=path.resolve(__dirname,'..');
 (async()=>{
-const reportName='scratch-web';
+const reportName=process.env.SCRATCH_TEST_REPORT || 'scratch-web';
+const baseUrl=process.env.SCRATCH_TEST_URL || 'http://localhost:8601';
 process.env.TEMP=path.join(root,'.cache/temp');process.env.TMP=process.env.TEMP;
 const app=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});
 const context=await app.newContext({viewport:{width:1350,height:900},acceptDownloads:true});
@@ -25,7 +26,7 @@ const clickFlyout=async label=>{
  await page.mouse.click(box.x+box.width/2,box.y+box.height/2);
 };
 
-await page.goto('http://localhost:8601');
+await page.goto(baseUrl);
 await page.waitForSelector('.blocklySvg',{timeout:180000});
 await page.waitForFunction(()=>{
  for(const el of document.querySelectorAll('div')){
@@ -38,7 +39,7 @@ const cachedAsset=await page.evaluate(async()=>{
  const response=await fetch('/internalapi/asset/809d9b47347a6af2860e7a3a35bce057.svg/get/');
  return {ok:response.ok,url:response.url,body:await response.text()};
 });
-assert(cachedAsset.ok);assert(cachedAsset.body.includes('<svg'));assert(cachedAsset.url.startsWith('http://localhost:8601/'));
+assert(cachedAsset.ok);assert(cachedAsset.body.includes('<svg'));assert(new URL(cachedAsset.url).origin===new URL(baseUrl).origin);
 checks.push('Standard library assets load from verified local cache');
 await page.getByRole('button',{name:'Choose a Sprite',exact:true}).first().click();
 await page.getByText('Abby',{exact:true}).click();
