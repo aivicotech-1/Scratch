@@ -12,6 +12,7 @@
     "build": "node scripts/build-deployment.cjs",
     "build:editor": "node scripts/build-scratch-web.cjs",
     "test:server": "node scripts/test-scratch-web-server.cjs",
-    "test:browser": "node scripts/test-scratch-web.cjs"
+    "test:browser": "node scripts/test-scratch-web.cjs",
+    "test:deployment-files": "node scripts/test-vercel-ignore.cjs"
   }
 }
