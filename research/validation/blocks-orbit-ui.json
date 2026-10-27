@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "Blocks Orbit page title, logo, favicon and default project title",
+    "Toolbar and tabs fit 1440px and 1024px desktop layouts",
+    "File menu remains readable and accessible",
+    "Fullscreen round trip and costume editor preserve their controls",
+    "Sprite library remains available with the new modal styling"
+  ],
+  "pageErrors": []
+}

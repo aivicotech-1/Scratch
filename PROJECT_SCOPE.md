@@ -1,6 +1,6 @@
-# Scratch editor website
+# Blocks Orbit website
 
-The current product is the official Scratch editor running in a browser at http://localhost:8601. Public hosting and new features are later steps.
+The current product is Blocks Orbit, a branded browser interface built on the official Scratch editor at http://localhost:8601. Public hosting and new features are later steps.
 
 The old PictoBlox research, Orbit prototype, REA tools, Electron host, desktop releases and desktop-only scripts have been removed. The website assets are in web/library-assets. The official source and its dependencies remain in scratch-editor; the pinned Node runtime is in tools.
 

@@ -1,5 +1,5 @@
 {
-  "name": "aivico-scratch-website",
+  "name": "blocks-orbit",
   "version": "1.0.0",
   "private": true,
   "license": "AGPL-3.0-only",
@@ -13,6 +13,7 @@
     "build:editor": "node scripts/build-scratch-web.cjs",
     "test:server": "node scripts/test-scratch-web-server.cjs",
     "test:browser": "node scripts/test-scratch-web.cjs",
-    "test:deployment-files": "node scripts/test-vercel-ignore.cjs"
+    "test:deployment-files": "node scripts/test-vercel-ignore.cjs",
+    "test:ui": "node scripts/test-orbit-ui.cjs"
   }
 }

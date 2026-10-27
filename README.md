@@ -1,6 +1,8 @@
-# Aivico Scratch Website
+# Blocks Orbit
 
-A browser-based visual programming editor built from the official [Scratch editor](https://github.com/scratchfoundation/scratch-editor). This repository adds the browser integration, local server, asset preparation, and Vercel deployment configuration.
+**Blocks Orbit** is a browser-based visual programming editor built from the official [Scratch editor](https://github.com/scratchfoundation/scratch-editor). This repository adds the browser integration, local server, asset preparation, and Vercel deployment configuration.
+
+The Blocks Orbit presentation layer uses its own logo, favicon, and navy-and-teal interface. The pinned Scratch runtime, block behavior, media editors, and project formats remain unchanged.
 
 The application runs in a web browser. It does not require Electron or a desktop installation.
 
@@ -105,6 +107,7 @@ For a server started with `npm run dev`, use **Ctrl+C** in its terminal instead.
 | `npm run build:editor` | Rebuild only the editor bundle using already-built Scratch dependencies. |
 | `npm run test:server` | Check local file serving and path restrictions. |
 | `npm run test:browser` | Run browser integration checks against a running website. |
+| `npm run test:ui` | Check Blocks Orbit branding, desktop layouts, menus, fullscreen, and media panels. |
 | `npm run test:deployment-files` | Check that deployment exclusions retain required source files. |
 
 **There is no automatic rebuild or hot reload.** After editing, rebuild and refresh the browser. The server can stay running, but save any open project before refreshing.
@@ -124,6 +127,8 @@ Use `npm run build:editor` for browser integration or GUI-only changes. Use the 
 
 | Path | Responsibility |
 | --- | --- |
+| [web/orbit.css](web/orbit.css) | Blocks Orbit colors, typography, toolbar, tabs, panels, and modal styling. |
+| [scripts/orbit-branding-loader.cjs](scripts/orbit-branding-loader.cjs) | Applies presentation-only logo labels and default project naming during the build. |
 | [web/render-editor.js](web/render-editor.js) | Mounts Scratch, configures local/hosted asset URLs, and disables unsupported online services. |
 | `scratch-editor/packages/scratch-gui/src/` | Editor interface, menus, panels, and project interactions. |
 | `scratch-editor/packages/scratch-vm/src/blocks/` | Execution of motion, control, variables, lists, and other programming blocks. |

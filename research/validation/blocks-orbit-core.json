@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "Official editor loads with stage and sprite",
+    "Standard library assets load from verified local cache",
+    "Sprite library thumbnails and selected sprite assets load locally",
+    "Create global variables and lists through the UI",
+    "Custom block editor opens",
+    "Costume paint editor loads",
+    "Sound editor loads",
+    "Real Scratch VM executes events, repeat, variables, lists and motion",
+    "SB3 archive saves and reopens with working scripts and assets",
+    "File menu saves a native SB3 project to disk",
+    "File menu reopens the saved SB3 project",
+    "File menu creates a fresh local project without a server account"
+  ],
+  "result": {
+    "score": 6,
+    "list": [
+      "working",
+      "working",
+      "working"
+    ],
+    "x": 30
+  },
+  "pageErrors": []
+}
