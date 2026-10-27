@@ -1,216 +1,239 @@
-# Scratch website project
+# Aivico Scratch Website
 
-Run the official Scratch editor in a browser at [http://localhost:8601](http://localhost:8601).
+A browser-based visual programming editor built from the official [Scratch editor](https://github.com/scratchfoundation/scratch-editor). This repository adds the browser integration, local server, asset preparation, and Vercel deployment configuration.
 
-## Run on localhost (Windows)
+The application runs in a web browser. It does not require Electron or a desktop installation.
 
-The working project is in **E:\PictobloxREA**. This existing workspace already contains the Node.js runtime, installed dependencies, compiled website and standard library assets. You do not need to install or rebuild anything for normal use.
+**Source:** [aivicotech-1/Scratch](https://github.com/aivicotech-1/Scratch) · **Local URL:** [localhost:8601](http://localhost:8601) · **Runtime:** Node.js 24.x
 
-### Option 1: Double-click the launcher
+## Contents
 
-1. Open **E:\PictobloxREA** in File Explorer.
-2. Double-click **Launch-Scratch-Web.cmd**.
-3. The launcher starts the server in the background and opens your browser.
-4. If the browser does not open, visit **http://localhost:8601** manually.
+- [Features and scope](#features-and-scope)
+- [Quick start](#quick-start)
+- [Development workflow](#development-workflow)
+- [Code structure](#code-structure)
+- [How the application works](#how-the-application-works)
+- [Deploy to Vercel](#deploy-to-vercel)
+- [Testing](#testing)
+- [Configuration and secrets](#configuration-and-secrets)
+- [Troubleshooting](#troubleshooting)
+- [Licensing and attribution](#licensing-and-attribution)
 
-Use **Launch-Scratch-Web.cmd** to start the browser website. No Electron desktop application is required or included.
+## Features and scope
 
-You can close the launcher window once startup completes. Closing the browser does not stop the background server. Run the launcher again after restarting Windows; if the server is already running, the launcher reuses it.
+| Included in the editor | Requires separate services or future work |
+| --- | --- |
+| Block programming, variables, lists, and custom blocks | User accounts and online project storage |
+| Sprites, backdrops, and stage controls | Community publishing, comments, and sharing |
+| Costume drawing and sound editing | Backpack and cloud-variable services |
+| Local project import/export as Scratch 3 files (`.sb3`) | Hardware devices and services needed by hardware extensions |
+| Standard sprite, costume, sound, and backdrop libraries | External services used by network-dependent extensions |
 
-### Option 2: Start from PowerShell
+The official editor is the current foundation. Hosting it does not reproduce the entire Scratch community website.
 
-Open PowerShell and paste:
+**Project saving:** use **File → Save to your computer** and **File → Load from your computer**. Save before refreshing or closing the page; account-based saving is not implemented.
 
-~~~powershell
-Set-Location 'E:\PictobloxREA'
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File '.\scripts\Start-Scratch-Web.ps1' -OpenBrowser
+## Quick start
+
+### Requirements
+
+- Git, with access to GitHub.
+- Node.js **24.x** and npm on your PATH. The local baseline used **24.22.1**.
+- A modern browser.
+- Internet access for the initial dependency, asset, and build-resource downloads.
+
+Run these commands in a terminal:
+
+~~~sh
+git clone --recurse-submodules https://github.com/aivicotech-1/Scratch.git
+cd Scratch
+npm ci --prefix scratch-editor --ignore-scripts --include=dev --no-audit --no-fund
+npm run build
+npm run dev
 ~~~
 
-To start the background server without opening another browser tab, omit `-OpenBrowser`.
+Open **[http://localhost:8601](http://localhost:8601)**. Keep the terminal open and press **Ctrl+C** to stop the server.
 
-### Option 3: Run in a terminal (easy to stop)
+The first build compiles Scratch and prepares its libraries; it can take several minutes. Wait for each command to succeed before continuing. Dependencies are installed inside `scratch-editor`; installing only the root package is not sufficient.
 
-If the background server is not already running:
+If you cloned without `--recurse-submodules`, retrieve the pinned Scratch source first:
 
-~~~powershell
-Set-Location 'E:\PictobloxREA'
-& '.\tools\node-v24.22.1\node.exe' '.\scripts\serve-scratch-web.cjs'
+~~~sh
+git submodule update --init --recursive
 ~~~
 
-Open **http://localhost:8601** and leave the terminal running. Press **Ctrl+C** in that terminal to stop this server.
+For subsequent starts, run only `npm run dev`. Rebuild when you change source code.
 
-The server listens on **127.0.0.1:8601**, so only this computer can access it. A localhost link does not publish the website online.
+<details>
+<summary>Optional Windows shortcut: start and stop the background server</summary>
 
-## Save and reopen projects
-
-- Use **File > New** to start a fresh project.
-- Use **File > Save to your computer** to download an `.sb3` project.
-- Use **File > Load from your computer** to reopen an `.sb3` project.
-
-Save your work before closing, refreshing or starting another project. This local setup does not provide account-based online saving.
-
-## Stop the background server
-
-Save your project first. For the server started by the launcher, run the following in PowerShell. It checks the process command line before stopping it:
+After completing the quick start, download the launcher’s pinned Node runtime once:
 
 ~~~powershell
-Set-Location 'E:\PictobloxREA'
-$scratchServerPid = [int](Get-Content -LiteralPath '.\.cache\web\server.pid')
+node scripts/setup-scratch-node.cjs
+~~~
+
+Double-click **Launch-Scratch-Web.cmd**. It starts the same website in the background and opens your default browser. It reuses an existing server and does not install a desktop app.
+
+Closing the browser does not stop this background process. It does not automatically restart after Windows restarts. Logs and the process ID are stored in `.cache/web/`.
+
+To stop a launcher-started server, save your project and run this from the repository root in PowerShell:
+
+~~~powershell
+$scratchServerPid = [int](Get-Content '.cache/web/server.pid')
+$scratchServerScript = (Resolve-Path 'scripts/serve-scratch-web.cjs').Path
 $scratchServerProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $scratchServerPid"
+
 if ($scratchServerProcess -and
     $scratchServerProcess.Name -eq 'node.exe' -and
-    $scratchServerProcess.CommandLine -like '*E:\PictobloxREA\scripts\serve-scratch-web.cjs*') {
+    $scratchServerProcess.CommandLine -match [regex]::Escape($scratchServerScript)) {
     Stop-Process -Id $scratchServerPid
-    Write-Output 'Scratch localhost server stopped.'
-} else {
-    Write-Output 'No matching Scratch server found for the saved process ID.'
 }
 ~~~
 
-For a server started directly in a terminal, use **Ctrl+C** instead.
+For a server started with `npm run dev`, use **Ctrl+C** in its terminal instead.
 
-## Troubleshooting
+</details>
 
-| Problem | What to do |
+## Development workflow
+
+| Command | Purpose |
 | --- | --- |
-| Browser says the site cannot be reached | Run Launch-Scratch-Web.cmd, then open http://localhost:8601. You can also try http://127.0.0.1:8601. |
-| The page shows an older version after a rebuild | Save your project, then refresh the page with Ctrl+F5. |
-| Port 8601 is already in use / EADDRINUSE | If Scratch is already running, use its existing browser URL. Otherwise identify the application using the port and close it before starting Scratch. |
-| Website build is missing | Follow the rebuild instructions below in the prepared workspace. |
-| Launcher reports an error | Read .cache/web/server-error.log and .cache/web/server.log. |
-| PowerShell blocks direct execution of the script | Use the .cmd launcher or the exact PowerShell command above. |
+| `npm run dev` | Serve the existing build on localhost:8601. |
+| `npm start` | Same local server as `npm run dev`. |
+| `npm run build` | Compile the full production site, verify/download libraries, and package deployable files. |
+| `npm run build:editor` | Rebuild only the editor bundle using already-built Scratch dependencies. |
+| `npm run test:server` | Check local file serving and path restrictions. |
+| `npm run test:browser` | Run browser integration checks against a running website. |
+| `npm run test:deployment-files` | Check that deployment exclusions retain required source files. |
 
-Check whether the server is responding:
+**There is no automatic rebuild or hot reload.** After editing, rebuild and refresh the browser. The server can stay running, but save any open project before refreshing.
 
-~~~powershell
-Invoke-RestMethod 'http://127.0.0.1:8601/healthz'
-~~~
+Use `npm run build:editor` for browser integration or GUI-only changes. Use the full `npm run build` after changes to the runtime, renderer, other dependent packages, or before deployment. An editor-only build clears `web/dist`, including previously packaged library assets.
 
-The response should contain `app: scratch-local-web` and `port: 8601`.
+### Working with the Scratch source
+
+`scratch-editor/` is a Git submodule: a separate repository pinned to a specific upstream commit. Its source and license details are recorded in [research/scratch-provenance.json](research/scratch-provenance.json). The baseline is Scratch editor **15.3.0**.
+
+- Make website integration and deployment changes in this repository.
+- Make editor, runtime, or drawing-tool changes inside the appropriate Scratch package.
+- Changes inside a submodule are not included automatically in a parent-repository commit. Publish modified Scratch source to a repository you control, update the submodule URL if needed, and commit the new submodule reference here.
+- Do not advance the upstream revision unintentionally. Review its changes and rerun the relevant checks when updating it.
+
+## Code structure
+
+| Path | Responsibility |
+| --- | --- |
+| [web/render-editor.js](web/render-editor.js) | Mounts Scratch, configures local/hosted asset URLs, and disables unsupported online services. |
+| `scratch-editor/packages/scratch-gui/src/` | Editor interface, menus, panels, and project interactions. |
+| `scratch-editor/packages/scratch-vm/src/blocks/` | Execution of motion, control, variables, lists, and other programming blocks. |
+| `scratch-editor/packages/scratch-render/src/` | Sprite and stage rendering. |
+| `scratch-editor/packages/scratch-paint/src/` | Costume/backdrop drawing tools. |
+| `scratch-editor/packages/scratch-storage/src/` | Project and asset storage support. |
+| [scripts/serve-scratch-web.cjs](scripts/serve-scratch-web.cjs) | Local HTTP server and asset routes. |
+| [scripts/build-deployment.cjs](scripts/build-deployment.cjs) | Runs the complete production build and packaging sequence. |
+| [scripts/build-scratch.cjs](scripts/build-scratch.cjs) | Builds the Scratch packages in dependency order. |
+| [scripts/build-scratch-web.cjs](scripts/build-scratch-web.cjs) | Configures and builds the browser editor with webpack. |
+| [scripts/cache-scratch-library.cjs](scripts/cache-scratch-library.cjs) | Downloads and verifies standard library assets. |
+| [scripts/package-web-assets.cjs](scripts/package-web-assets.cjs) | Copies verified assets and notices into the deployment output. |
+| [vercel.json](vercel.json) | Vercel install/build commands, output directory, and asset routing. |
+| [research/](research/) | Source provenance, baseline notes, and validation evidence. |
+
+Generated files are excluded from Git:
+
+| Path | Contents |
+| --- | --- |
+| `web/dist/` | Compiled website and, after a full build, packaged libraries. **Do not edit directly.** |
+| `web/library-assets/` | Downloaded standard library cache; 1,347 assets in the current baseline. |
+| `scratch-editor/node_modules/` | Installed upstream dependencies. |
+| `.cache/` | Build/download caches, logs, and local tools. |
+| `tools/node-v*/` | Optional pinned Windows Node runtime for the shortcut. |
+| `projects/` | Local user projects, if saved here. |
+
+## How the application works
+
+1. **Build:** the build helper prepares generated assets and compiles Scratch’s packages and browser integration.
+2. **Package:** standard media assets are checked against their MD5 content identifiers and copied into `web/dist/library-assets/`. License notices and a source-code link are included.
+3. **Run locally:** the Node server serves `web/dist/` and reads library assets from `web/library-assets/`. It listens only on this computer.
+4. **Run on Vercel:** Vercel serves `web/dist/` as static files. The editor and Scratch runtime execute in the visitor’s browser; no persistent Node server is required.
+
+Scratch requests assets through `/internalapi/asset/<filename>/get/`. The local server handles this route directly. Vercel normalizes the trailing slash and rewrites the request to `/library-assets/<filename>`.
 
 ## Deploy to Vercel
 
-Import **aivicotech-1/Scratch** from GitHub into Vercel and select the **main** branch. Use the repository root (do not select scratch-editor). The checked-in vercel.json supplies these settings:
+Import **aivicotech-1/Scratch**, choose branch **main**, and leave the Root Directory at the repository root (`./`).
+
+The configuration is checked into [vercel.json](vercel.json):
 
 | Setting | Value |
 | --- | --- |
 | Framework preset | Other |
 | Node.js | 24.x |
-| Install command | npm ci --prefix scratch-editor --ignore-scripts --include=dev --no-audit --no-fund |
-| Build command | npm run build |
-| Output directory | web/dist |
+| Install command | `npm ci --prefix scratch-editor --ignore-scripts --include=dev --no-audit --no-fund` |
+| Build command | `npm run build` |
+| Output directory | `web/dist` |
+| Required application environment variables | None |
 
-No application secrets or environment variables are required for the current editor. Future server credentials belong in Vercel's Environment Variables settings, not in Git or client-side JavaScript.
+The public submodule supplies the pinned Scratch source. Initial builds need network access to npm, Scratch’s asset service, and the generated micro:bit resource download.
 
-Vercel fetches the public Scratch submodule. The build compiles the editor in production mode, downloads and verifies the standard assets, and copies them into the static output. The asset rewrite in vercel.json maps Scratch's asset URLs to those packaged files. No persistent Node server or Windows launcher runs on Vercel.
+After Vercel reports **Ready**, test its HTTPS URL in a signed-out/private browser window. Confirm that the intended visitors can access it before sharing.
 
-After deployment reaches **Ready**, open the assigned HTTPS address and test it in a signed-out/private window before sharing. Confirm production Deployment Protection permits your intended visitors. The first deployment needs network access to npm, Scratch's asset service and the generated micro:bit asset download.
+**Deployment exclusions:** [.vercelignore](.vercelignore) must preserve nested source directories. Use `/tools/` to exclude the root runtime folder; an unanchored `tools/` also excludes Scratch’s paint tools and breaks the build.
 
-Use File > Save to your computer to keep projects. Hosting the editor does not add accounts, cloud project storage or Scratch community services.
+## Testing
 
-### npm commands
+After building, start `npm run dev` in one terminal. In another terminal at the repository root:
 
-With Node.js 24.x installed and the project prepared:
-
-~~~powershell
-npm run dev
+~~~sh
+npm run test:server
+npm run test:deployment-files
+npm run test:browser
 ~~~
 
-This starts localhost:8601 in the terminal; Ctrl+C stops it. To build the complete production site:
+The browser test currently expects **Windows with Google Chrome installed at its standard Program Files path**. It uses Playwright from the Scratch dependencies; the browser test itself is not yet portable to every operating system.
+
+The 12 browser checks cover editor startup, standard assets, sprite selection, variables/lists, the custom-block dialog, costume/sound editors, program execution, and SB3 save/open/new. Hardware extensions and external services are not covered.
+
+Reports and screenshots are in [research/validation/](research/validation/). Local production-build checks passed on **26 October 2026**. The deployment filter also has a regression check covering all six paint-tool files and 2,636 tracked upstream source files. These checks do not certify a live Vercel deployment.
+
+To test another running URL from PowerShell:
 
 ~~~powershell
-npm run build
+$env:SCRATCH_TEST_URL = 'https://your-project.vercel.app'
+$env:SCRATCH_TEST_REPORT = 'scratch-hosted'
+npm run test:browser
 ~~~
 
-The production build also works on Linux and uses the running Node executable. Builds fetch missing standard assets and place deployable files under web/dist. Rebuilding only the editor clears that output, so use the full production build before deployment.
+## Configuration and secrets
 
+The current editor requires no application credentials.
 
-## Set up a fresh GitHub clone (Windows)
+- Keep future local secrets in `.env` files; they are excluded from Git and deployment uploads.
+- Document variable names without real values in [.env.example](.env.example).
+- The current server does **not** automatically load `.env` files.
+- Configure future hosted server credentials in Vercel’s environment settings. Never embed secrets in browser code or static build output.
+- GitHub/Vercel login credentials belong in their authentication tools, not this repository.
 
-This repository tracks the official Scratch source as a **Git submodule**, pinned to the commit in research/scratch-provenance.json. Use a recursive clone so you receive both this website integration and the Scratch source:
+The local server reads `PORT` from the process environment and defaults to `8601`. The Windows shortcut always targets port `8601`.
 
-~~~powershell
-git clone --recurse-submodules https://github.com/aivicotech-1/Scratch.git scratch-website
-Set-Location scratch-website
-~~~
+## Troubleshooting
 
-If you already cloned without submodules, run:
+| Symptom | Action |
+| --- | --- |
+| `scratch-editor` is empty or packages are missing | Run `git submodule update --init --recursive`, then the dependency-install command from Quick start. |
+| Website build is missing | Run `npm run build` before starting the server. |
+| Localhost cannot be reached | Start `npm run dev`; also try `http://127.0.0.1:8601`. |
+| `EADDRINUSE` / port already in use | Reuse the running Scratch server or stop the process occupying port 8601. |
+| Changes do not appear | Rebuild, save your project, and hard-refresh the browser. |
+| Windows shortcut fails | Run `node scripts/setup-scratch-node.cjs` if its runtime is missing; inspect `.cache/web/server-error.log`. |
+| Vercel reports missing paint-tool modules | Run `npm run test:deployment-files` and deploy the latest commit containing the anchored ignore rules. |
+| Library assets are missing after deployment | Use the full production build and preserve the asset rewrite in `vercel.json`. |
+| Build shows dependency or bundle-size warnings | Check the final exit status. Warnings alone do not mean failure; a nonzero exit needs investigation. |
 
-~~~powershell
-git submodule update --init --recursive
-~~~
+The local health endpoint is `http://127.0.0.1:8601/healthz`; it should return `app: scratch-local-web`. It is not part of the static Vercel website.
 
-Install Git and Node.js **24.22.1** with npm first. Then run the following from your clone's root folder. These commands download dependencies and standard library assets and build the website:
+## Licensing and attribution
 
-~~~powershell
-$projectRoot = (Get-Location).Path
-$env:TEMP = Join-Path $projectRoot '.cache\temp'
-$env:TMP = $env:TEMP
-$env:npm_config_cache = Join-Path $projectRoot '.cache\npm'
-$env:PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1'
-New-Item -ItemType Directory -Force -Path $env:TEMP | Out-Null
+Read [LICENSE](LICENSE), [TRADEMARK](TRADEMARK), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The source uses **AGPL-3.0-only**; Scratch branding and media have separate considerations.
 
-node scripts/setup-scratch-node.cjs
-Push-Location scratch-editor
-npm ci --ignore-scripts --no-audit --no-fund
-Pop-Location
-& '.\tools\node-v24.22.1\node.exe' scripts/build-scratch.cjs
-& '.\tools\node-v24.22.1\node.exe' scripts/cache-scratch-library.cjs
-.\Launch-Scratch-Web.cmd
-~~~
-
-Stop and resolve any command failure before continuing. The build helper runs the required GUI asset-generation step explicitly. Runtime binaries, installed dependencies, generated website files, downloaded library assets, caches and personal projects are intentionally excluded from Git.
-
-The E:\PictobloxREA paths elsewhere in this guide describe the original development computer. Substitute your own clone location when following those examples. The launcher and server resolve their paths relative to the project folder.
-
-
-## Rebuild after changing the browser integration
-
-Run these commands from PowerShell in the prepared workspace. A rebuild is not needed each time you start the website.
-
-~~~powershell
-Set-Location 'E:\PictobloxREA'
-$env:NODE_OPTIONS = '--max-old-space-size=6144'
-& '.\tools\node-v24.22.1\node.exe' '.\scripts\build-scratch-web.cjs'
-~~~
-
-Wait for a successful build, then start the server if necessary and refresh your browser. This build uses the existing official Scratch checkout and its installed dependencies; these instructions are not a fresh-machine installation guide.
-
-## Verify the website
-
-With the localhost server running:
-
-~~~powershell
-Set-Location 'E:\PictobloxREA'
-& '.\tools\node-v24.22.1\node.exe' '.\scripts\test-scratch-web-server.cjs'
-& '.\tools\node-v24.22.1\node.exe' '.\scripts\test-scratch-web.cjs'
-~~~
-
-Browser verification uses installed Google Chrome. Reports and screenshots are saved under **research/validation/scratch-web.***.
-
-Verified on 26 October 2026: 12 Chrome integration checks passed, plus server file-access checks. No unhandled page errors or server project-write requests occurred. Standard-library asset requests stayed on localhost.
-
-## Project files and features
-
-- **web/render-editor.js**: browser integration with local standard-library URLs.
-- **web/dist/**: compiled website.
-- **scripts/serve-scratch-web.cjs**: localhost website and asset server.
-- **scripts/Start-Scratch-Web.ps1**: background server launcher.
-- **scratch-editor/**: pinned official source, kept separate and unchanged.
-- **web/library-assets/**: 1,347 verified standard library assets used by the website.
-- **scratch-editor/node_modules/**: upstream build dependencies and the browser-test tools.
-- **research/**: source provenance and verification evidence.
-
-The editor includes blocks, variables, lists, custom procedures, sprites/stage, costume and sound editors, SB3 projects and the extension interface. Accounts, community sharing, backpack and cloud-variable servers are separate services. Hardware and network-dependent extensions require their external devices or services.
-
-The retired PictoBlox research, Orbit prototype, REA tools, Electron host, desktop releases and desktop-only scripts were removed. The directory name is historical. Future features will be added only when requested.
-
-The upstream LICENSE and TRADEMARK notices remain intact. Public release still needs appropriate branding, corresponding-source delivery and an asset/dependency license review.
-
-## Secrets and environment files
-
-The current localhost editor requires no API keys or application secrets. Keep any future credentials in a local .env file, never in source code. Local .env files are ignored by Git; .env.example documents required variables without real values. The current server does not automatically load .env files. GitHub authentication stays in Windows Git Credential Manager and is not part of this repository.
-
-Production verification (26 October 2026): the full production build and all 12 browser checks passed locally using Vercel's compiled routing rules. All 1,347 library assets were packaged, asset redirects/content types worked, and private files returned 404. Build warnings concern bundle size and optional Node-only canvas support. The first actual Vercel cloud deployment remains to be performed by the account owner.
-
-Deployment file-filter regression: run `npm run test:deployment-files` to check that Vercel retains Scratch's nested paint tools and other tracked source while excluding local binaries and credentials. Root-only ignore patterns must start with /; a bare tools/ pattern also removes the paint editor's src/helper/tools folder.
+Preserve upstream notices and source availability when distributing changes. This project is not endorsed by the Scratch Foundation. Asset/dependency redistribution review and an independent public product identity remain outstanding.
