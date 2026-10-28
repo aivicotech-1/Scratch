@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "Python-only view replaces blocks and shows an empty-state explanation",
+    "Dragging a real Motion block produces Python in Both view",
+    "Changing a block input updates Python live",
+    "Deleting and undoing blocks updates the preview",
+    "Nested scripts, clipboard copy, and mode switching preserve the project",
+    "Both view is side by side on desktop and stacked on smaller screens",
+    "Selected sprite and stage each show their own scripts",
+    "Costume tabs remain separate and green flag still executes blocks in Python view"
+  ],
+  "errors": []
+}

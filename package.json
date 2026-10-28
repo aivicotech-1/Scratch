@@ -14,6 +14,8 @@
     "test:server": "node scripts/test-scratch-web-server.cjs",
     "test:browser": "node scripts/test-scratch-web.cjs",
     "test:deployment-files": "node scripts/test-vercel-ignore.cjs",
-    "test:ui": "node scripts/test-orbit-ui.cjs"
+    "test:ui": "node scripts/test-orbit-ui.cjs",
+    "test:python": "node scripts/test-python-generator.cjs",
+    "test:python-ui": "node scripts/test-python-view.cjs"
   }
 }

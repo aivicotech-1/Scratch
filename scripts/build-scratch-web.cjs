@@ -15,6 +15,14 @@ config.plugins = config.plugins.filter(plugin =>
     plugin.constructor.name !== 'HtmlWebpackPlugin' || plugin.userOptions.chunks?.includes('gui'));
 config.plugins.push(new webpack.NormalModuleReplacementPlugin(
     /^\.\/render-gui\.jsx$/, path.join(root, 'web/render-editor.js')));
+// Replace only the GUI's block-container import; keep upstream sources untouched.
+config.plugins.push(new webpack.NormalModuleReplacementPlugin(
+    /^\.\.\/\.\.\/containers\/blocks\.jsx$/, resource => {
+        if (resource.context === path.join(root, 'scratch-editor/packages/scratch-gui/src/components/gui')) {
+            resource.request = path.join(root, 'web/python-workspace.js');
+        }
+    }
+));
 const fs = require('node:fs');
 const HtmlWebpackPlugin = require(path.join(root, 'scratch-editor/node_modules/html-webpack-plugin'));
 config.module.rules.push({

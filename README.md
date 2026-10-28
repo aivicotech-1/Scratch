@@ -35,6 +35,16 @@ The official editor is the current foundation. Hosting it does not reproduce the
 
 **Project saving:** use **File → Save to your computer** and **File → Load from your computer**. Save before refreshing or closing the page; account-based saving is not implemented.
 
+### Blocks and Python learning views
+
+In the **Code** tab, choose **Blocks**, **Python code**, or **Both**. Python follows the selected sprite or stage and updates after block additions, edits, deletions, and undo/redo. Both shows the views side by side on wide screens and vertically on narrower screens. Below 1,024 pixels, the stage moves below the full-width editor. Scripts are fitted after layout changes; **Fit blocks** brings them back into view without moving or changing the project blocks. **Copy code** copies the preview without line numbers.
+
+This is a **read-only teaching translation**, not an executable Python environment or a two-way converter. The green flag still runs the original blocks. Generated Python uses an illustrative `orbit` API for sprites, events, Scratch-style values, and 1-based list operations; that Python runtime is not included. Variable and list declarations reflect the current project snapshot.
+
+The translator covers common motion, looks, sound, events, control, sensing, operators, variables, lists, and custom blocks, plus selected pen/music commands. Untranslated blocks are explicitly shown as `orbit.unsupported(...)` and listed in translation notices. Unattached stacks are labeled separately. It does not claim executable equivalence for extension/hardware behavior or Scratch scheduling.
+
+Implementation stays outside the pinned upstream source: `web/python-workspace.js` supplies the view controls and VM subscriptions, `web/python-generator.cjs` translates the serialized block graph, and `web/python-workspace.css` handles the layout. The build substitutes the GUI's block-container import with this wrapper; the wrapper retains the original block editor.
+
 ## Quick start
 
 ### Requirements
@@ -108,6 +118,8 @@ For a server started with `npm run dev`, use **Ctrl+C** in its terminal instead.
 | `npm run test:server` | Check local file serving and path restrictions. |
 | `npm run test:browser` | Run browser integration checks against a running website. |
 | `npm run test:ui` | Check Blocks Orbit branding, desktop layouts, menus, fullscreen, and media panels. |
+| `npm run test:python` | Test translation of control flow, data, custom blocks, and unsupported blocks. |
+| `npm run test:python-ui` | Test live drag/drop updates, undo, modes, target changes, and block execution. |
 | `npm run test:deployment-files` | Check that deployment exclusions retain required source files. |
 
 **There is no automatic rebuild or hot reload.** After editing, rebuild and refresh the browser. The server can stay running, but save any open project before refreshing.

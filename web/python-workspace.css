@@ -1,0 +1,49 @@
+.orbit-workspace {position:absolute;inset:0;display:flex;flex-direction:column;min-width:0;min-height:0;background:#f6faf9;border-radius:12px;overflow:hidden}
+.orbit-viewbar {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;min-height:44px;box-sizing:border-box;border-bottom:1px solid #d5e4e1;background:#edf5f3}
+.orbit-view-buttons {display:flex;gap:4px}
+.orbit-viewbar button,.orbit-python-heading button {font:600 12px "Segoe UI",sans-serif;border:1px solid #b9d3cd;background:white;color:#25483f;padding:7px 11px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.orbit-viewbar button[aria-pressed="true"] {background:#087f75;color:white;border-color:#087f75}
+.orbit-viewbar button:focus-visible,.orbit-python-heading button:focus-visible,.orbit-python-pane pre:focus-visible {outline:3px solid #e5a625;outline-offset:-3px}
+.orbit-view-hint {font-size:11px;color:#506c65}
+.orbit-workspace-panes {flex:1;display:flex;min-height:0;min-width:0}
+.orbit-block-pane {position:relative;flex:1;min-width:0;min-height:0}
+.orbit-block-pane[hidden] {display:none}
+.orbit-python-pane {display:flex;flex-direction:column;min-width:0;min-height:0;flex:1;background:#102332;color:#e5f1ed;border-left:1px solid #bfd5cf}
+.orbit-workspace[data-view="split"] .orbit-block-pane {flex:1.3}
+.orbit-workspace[data-view="split"] .orbit-python-pane {flex:1;min-width:240px}
+.orbit-python-heading {display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:8px}
+.orbit-python-heading strong {font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.orbit-python-heading button {padding:5px 8px;background:#203e4a;color:#ddfff4;border-color:#527179}
+.orbit-python-note {font-size:11px;line-height:1.5;color:#bfd1d5;padding:0 12px 10px;margin:0;border-bottom:1px solid #2c4655}
+.orbit-python-pane pre {flex:1;overflow:auto;margin:0;padding:12px 10px;tab-size:4;font:12px/1.8 Consolas,"Courier New",monospace;white-space:pre;user-select:text}
+.orbit-python-line {color:#e7f4fb}
+.orbit-python-comment {color:#95bdad}
+.orbit-line-number {display:inline-block;width:3em;text-align:right;margin-right:1.5em;color:#77929f;user-select:none}
+.orbit-python-warnings {padding:8px 12px;background:#493d23;color:#ffe3a2;font-size:11px;max-height:120px;overflow:auto}
+.orbit-python-warnings summary {cursor:pointer}
+.orbit-copy-status {font-size:11px;padding:0 12px;color:#b9f5dc;min-height:18px}
+/* The extension button belongs to the upstream tab, outside the block workspace. */
+section:has(> .orbit-workspace[data-view="python"]) ~ [class*="extension-button-container"] {display:none}
+@media(max-width:1250px) {
+ .orbit-view-hint {display:none}
+ .orbit-workspace[data-view="split"] .orbit-workspace-panes {flex-direction:column}
+ .orbit-workspace[data-view="split"] .orbit-block-pane {flex:1.3;min-height:200px}
+ .orbit-workspace[data-view="split"] .orbit-python-pane {flex:1;min-height:140px;border-left:0;border-top:1px solid #bfd5cf}
+ section:has(> .orbit-workspace[data-view="split"]) ~ [class*="extension-button-container"] {bottom:var(--orbit-split-bottom, calc((100% - 44px) / 2.3))}
+}
+section:has(> .orbit-workspace) ~ [class*="watermark"] {display:none}
+
+/* In a narrow browser, give the editor the full width and put the stage below it.
+   Keep enough vertical room for real scripts instead of compressing both panes. */
+@media (max-width: 1023px) {
+ html:has(.orbit-workspace[data-view="split"]),
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]),
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="index_app_"] {min-width:0;min-height:100%;height:auto}
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="gui_page-wrapper_"] {height:auto}
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="gui_body-wrapper_"] {height:auto}
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="gui_flex-wrapper_"] {flex-direction:column;overflow:visible}
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="gui_editor-wrapper_"] {flex:0 0 auto;width:100%;min-width:0;height:max(660px, calc(100dvh - 60px))}
+ body.blocks-orbit:has(.orbit-workspace[data-view="split"]) [class*="gui_stage-and-target-wrapper_"] {align-self:center;flex:0 0 auto;min-height:580px;max-width:100%}
+ .orbit-workspace[data-view="split"] .orbit-block-pane {min-height:300px}
+ .orbit-workspace[data-view="split"] .orbit-python-pane {min-height:210px}
+}
